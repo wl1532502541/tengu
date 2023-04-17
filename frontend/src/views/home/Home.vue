@@ -4,6 +4,7 @@
         <div class="main-container">
             <div>
                 <ConnView />
+                <FileView class="file-container" />
             </div>
 
             <div class="main-view-container">
@@ -26,6 +27,10 @@
         height: 88vh;
         padding: 10px;
         display: flex;
+
+        .file-container {
+          margin-top: 10px;
+        }
 
         .main-view-container {
             overflow: hidden;

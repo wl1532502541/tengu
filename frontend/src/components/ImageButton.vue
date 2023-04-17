@@ -1,6 +1,7 @@
 <template>
     <div class="image-btn-container" @click="handleClick">
         <img :src="icon" class="image">
+        <span v-if="text">{{ text }}</span>
     </div>
 </template>
     
@@ -8,6 +9,7 @@
 
 interface Props {
     icon: string
+    text?: string
 }
 
 defineProps<Props>()
@@ -22,8 +24,7 @@ const handleClick = () => {
 <style lang="less">
 .image-btn-container {
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -33,9 +34,14 @@ const handleClick = () => {
         border-radius: 5px;
     }
 
+    span {
+        margin-left: 10px;
+        font-size: 14px;
+    }
+
     .image {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 }
 </style>

@@ -26,7 +26,6 @@ import { TenguConn } from '../type/conn';
 
 const connStore = useConnStore();
 
-// const treeData = connStore.openedConnList
 
 
 onMounted(async () => {
