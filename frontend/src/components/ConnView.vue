@@ -26,22 +26,7 @@ import { TenguConn } from '../type/conn';
 
 const connStore = useConnStore();
 
-const treeData = connStore.openedConnList
-
-
-watch(() => connStore.connList, (newValue) => {
-    newValue.forEach(conn => {
-        const index = treeData.findIndex(item => item.name === conn.connectionName)
-        if (index === -1) {
-            treeData.push({ id: conn.connectionName, name: conn.connectionName, type: `conn_${conn.type}`, isOpen: false, children: [], parentName: '', dsn: `${conn.userName}:${conn.password}@tcp(${conn.host}:${conn.port})/`, connType: conn.type })
-        } else {
-            treeData[index].type = `conn_${conn.type}`
-            treeData[index].name = conn.connectionName
-            treeData[index].id = conn.connectionName
-        }
-    })
-    connStore.setOpenedConnList(treeData)
-})
+// const treeData = connStore.openedConnList
 
 
 onMounted(async () => {
@@ -100,6 +85,7 @@ const handleNodeClick = async (data: TenguConn, node: TreeNode) => {
 }
 
 const getTables = async (data: TenguConn) => {
+    const treeData = connStore.openedConnList
     const resStr = await Query(data.connType, data.dsn, 'SHOW TABLES;')
     const res: QueryResult = JSON.parse(resStr);
     if (res.IsErr) {
@@ -145,13 +131,15 @@ const getTables = async (data: TenguConn) => {
 }
 
 const getDataBases = async (data: TenguConn) => {
+    debugger
+    const treeData = connStore.openedConnList
     const resStr = await Query(data.connType, data.dsn, 'show databases;')
     const res: QueryResult = JSON.parse(resStr);
     if (res.IsErr) {
         ElMessage.error(res.ErrMsg)
         return
     }
-    
+
     const current = treeData.find(item => item.name == data.name)
     if (current) {
         current.isOpen = true
@@ -192,6 +180,10 @@ const getDataBases = async (data: TenguConn) => {
         display: flex;
         align-items: center;
         font-size: 16px;
+        width: 100%;
+        -webkit-user-select: none;
+        user-select: none;
+
 
         .tree-icon {
             margin-right: 10px;
