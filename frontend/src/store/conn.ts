@@ -20,6 +20,7 @@ export const useConnStore = defineStore("conn", {
       this.connList = connList;
     },
     setOpenedConnList(openedConnList: TenguConn[]) {
+        console.log(openedConnList)
       this.openedConnList = openedConnList;
     },
     setCurrentConn(currentConn: TenguConn) {
@@ -27,6 +28,16 @@ export const useConnStore = defineStore("conn", {
     },
     addConn(conn: DBConn) {
       this.connList.push(conn);
+      this.openedConnList.push({
+        id: conn.connectionName,
+        name: conn.connectionName,
+        type: `conn_${conn.type}`,
+        isOpen: false,
+        children: [],
+        parentName: "",
+        dsn: `${conn.userName}:${conn.password}@tcp(${conn.host}:${conn.port})/`,
+        connType: conn.type,
+      });
     },
   },
 });
