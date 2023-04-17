@@ -1,19 +1,31 @@
-# README
+# Tengu
 
-## About
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/username/Tengu/blob/master/LICENSE)
 
-This is the official Wails Vue-TS template.
+Tengu is an open-source project licensed under the MIT license.
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+## Introduction
 
-## Live Development
+What is Tengu project about?
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+A Open Source Database Client Tool for Windows, Linux and Mac OS X.
 
-## Building
+## Contribution
 
-To build a redistributable, production mode package, use `wails build`.
+Contributions to the Tengu project are welcome! Please follow these steps:
+
+1. Fork this repository
+2. Create your own branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Added a new feature'`)
+4. Push your branch to GitHub (`git push origin my-new-feature`)
+5. Create a new pull request
+
+## License
+
+The Tengu project is licensed under the MIT license, see the LICENSE file for details.
+
+## Contact
+
+If you have any questions about the Tengu project, please contact us:
+
+- Email: [kayshen_xu@163.com](mailto:kayshen_xu@163.com)
