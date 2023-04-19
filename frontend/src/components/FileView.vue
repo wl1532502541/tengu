@@ -1,12 +1,13 @@
 <template>
     <div class="file-view-container">
         <el-scrollbar>
-            <el-tree :data="sqlScriptStore.sqlSqcriptList" node-key="fileName" @node-click="handleNodeClick" highlight-current
-                :expand-on-click-node="false">
+            <el-tree :data="sqlScriptStore.sqlSqcriptList" node-key="filePath" @node-click="handleNodeClick"
+                highlight-current :expand-on-click-node="false" ref="treeRef">
                 <template #default="{ node, data }">
                     <div class="file-node-container" @dblclick="() => handleDbClick(data, node)">
-                        <SvgIcon :name="'sql-script'" class="sql-script-icon"/>
-                        <el-tooltip effect="light" :content="data.filePath" placement="top">
+                        <SvgIcon :name="'sql-script'" class="sql-script-icon" />
+                        <el-tooltip effect="light" :content="data.filePath" placement="bottom-start" :show-after="500"
+                            :enterable="false" :show-arrow="false">
                             <span class="file-text">{{ data.fileName }}</span>
                         </el-tooltip>
                     </div>
@@ -27,28 +28,41 @@ import sqlScriptImg from '../assets/images/sql_script.png'
 
 const sqlScriptStore = useSqlScriptStore()
 const Cnt = ref(0)
+const treeRef = ref()
 onMounted(async () => {
     const storage = await GetStorage('sql-script')
     if (storage) {
         sqlScriptStore.setList(JSON.parse(storage))
         Cnt.value = JSON.parse(storage).length
     }
+
+    watch(() => workTabStore.currentWorkTabId, (val) => {
+        if (sqlScriptStore.findByFilePath(val)) {
+            treeRef.value.setCurrentKey(val)
+        } else {
+            treeRef.value.setCurrentKey(null)
+        }
+        debugger
+    })
 });
 
 const workTabStore = useWorkTabStore()
-const handleNodeClick = (sqlScript:SqlScript,node:TreeNode)=>{
+const handleNodeClick = (sqlScript: SqlScript, node: TreeNode) => {
     sqlScriptStore.setCurrent(sqlScript)
 }
-const handleDbClick = (sqlScript:SqlScript,node:TreeNode)=>{
-    if(!workTabStore.findAndSetById(sqlScript.fileName)){
-        workTabStore.addWorkTab({
-          id: sqlScript.fileName,
-          name: sqlScript.fileName,
-          component: shallowRef(SqlEditor),
-          closeable: true,
-          icon: sqlScriptImg,
-        })        
+const handleDbClick = (sqlScript: SqlScript, node: TreeNode) => {
+    const id = sqlScript.filePath
+    if (workTabStore.findAndSetById(id)) {
+        return
     }
+    workTabStore.addWorkTab({
+        id,
+        name: sqlScript.fileName,
+        component: shallowRef(SqlEditor),
+        closeable: true,
+        icon: sqlScriptImg,
+    })
+    workTabStore.findAndSetById(id)
 }
 </script>
     
@@ -60,6 +74,7 @@ const handleDbClick = (sqlScript:SqlScript,node:TreeNode)=>{
     border-radius: 10px;
     height: 32vh;
     box-shadow: 2px 2px 10px rgba(90, 89, 89, 0.2);
+
     .file-node-container {
         display: flex;
         align-items: center;
@@ -67,11 +82,13 @@ const handleDbClick = (sqlScript:SqlScript,node:TreeNode)=>{
         width: 100%;
         -webkit-user-select: none;
         user-select: none;
+
         .sql-script-icon {
             margin-right: 10px;
             width: 15px;
             height: 15px;
         }
+
         .file-text {
             width: 130px;
             overflow: hidden;

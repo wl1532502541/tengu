@@ -21,13 +21,16 @@
 <script setup lang='ts'>
 import * as monaco from 'monaco-editor';
 import { useConnStore } from '../store/conn';
-import { useSqlScriptStore } from '../store/sql-script'
-import { Query,SaveFileDialog } from '../../wailsjs/go/main/App';
+import { SqlScript, useSqlScriptStore } from '../store/sql-script'
+import { Query, SaveFileDialog } from '../../wailsjs/go/main/App';
 import { ElMessage } from 'element-plus';
 import { QueryResult } from '../type/query-result';
 import { GetStorage } from '../../wailsjs/go/main/App';
 import { SaveStorage } from '../../wailsjs/go/main/App';
-import { useWorkTabStore } from '../store/work-tab';
+import { WorkTab, useWorkTabStore } from '../store/work-tab';
+import SqlEditor from './SqlEditor.vue'
+import sqlScriptImg from '../assets/images/sql_script.png'
+
 
 const connStore = useConnStore()
 
@@ -63,6 +66,7 @@ const tableHeight = ref('10px')
 let instance: monaco.editor.IStandaloneCodeEditor;
 
 onMounted(() => {
+    debugger
     nextTick().then(() => {
         const height = (container.value.clientHeight - 40) / 2
         tableHeight.value = `${height}px`
@@ -105,6 +109,11 @@ onMounted(() => {
             enabled: false // 是否启用预览图
         },
     });
+    const sqlCurrent = sqlScriptStore.current
+    if (sqlCurrent) {
+        instance.setValue(sqlCurrent.sql)
+        debugger
+    }
 
     // document.addEventListener("keydown", (e) => {
     //     console.log(e)
@@ -146,29 +155,51 @@ const runSql = async () => {
 }
 
 const sqlScriptStore = useSqlScriptStore()
-const saveSql = async () =>{
+const saveSql = async () => {
     const sqlScriptContent = instance.getValue()
-    try{
+    try {
+        let sqlScriptList: SqlScript[] = [];
+        const storage = await GetStorage('sql-script')
+        if (storage) {
+            sqlScriptList = JSON.parse(storage)
+        }
+
+        const exitSql = sqlScriptStore.findByFilePath(workTabStore.currentWorkTabId)
+        if (exitSql) {
+            exitSql.sql = instance.getValue()
+            await SaveStorage('sql-script', JSON.stringify(sqlScriptStore.sqlSqcriptList))
+            ElMessage.success("save sql script success!")
+            return
+        }
+
         let saveFileName = workTabStore.currentWorkTab?.name as string
         //获取最后一个.的位置
-        let index= saveFileName.lastIndexOf(".");
-        if(index===-1){
+        let index = saveFileName.lastIndexOf(".");
+        if (index === -1) {
             saveFileName = saveFileName + ".sql"
         }
-        const sqlScriptPath = await SaveFileDialog(saveFileName,"Save sql script",sqlScriptContent)
-        const fileName = sqlScriptPath.split("/").pop()
-        // 把文件名放入storage里 存文件名——地址的映射
-        const storage = await GetStorage('sql-script')
-        if(storage){
-            const sqlScriptList =JSON.parse(storage)
-            sqlScriptList.push({fileName:fileName,filePath:sqlScriptPath})
-            // 存入storage
-            await SaveStorage('sql-script', sqlScriptList)
-            // 存入store
-            sqlScriptStore.add(sqlScriptList)
+        const sqlScriptPath = await SaveFileDialog(saveFileName, "Save sql script", sqlScriptContent)
+        const fileName = sqlScriptPath.split("\\").pop()
+        if (!fileName) {
+            // 说明取消了保存
+            return
         }
-    }catch(e){
-        console.log('save sql error:',e)
+
+        const newSqlScript = { fileName: fileName as string, filePath: sqlScriptPath, sql: instance.getValue() }
+        sqlScriptList.push(newSqlScript)
+        sqlScriptStore.setCurrent(newSqlScript)
+        // 存入storage
+        await SaveStorage('sql-script', JSON.stringify(sqlScriptList))
+        // 存入store
+        sqlScriptStore.setList(sqlScriptList)
+
+        // 保存新文件成功后把当前untitled换成返回的名字 todo 这里有点问题
+        const currentWorkTab = workTabStore.currentWorkTab as WorkTab
+        currentWorkTab.name = fileName as string
+        currentWorkTab.id = sqlScriptPath
+        workTabStore.setCurrentWorkTabId(sqlScriptPath)
+    } catch (e) {
+        console.log('save sql error:', e)
     }
 }
 
@@ -189,15 +220,16 @@ const saveSql = async () =>{
         display: flex;
         align-items: center;
         justify-content: end;
-        gap:20px;
+        gap: 20px;
 
         .run-icon {
             cursor: pointer;
         }
-        .save-icon{
+
+        .save-icon {
             cursor: pointer;
         }
-        
+
     }
 
 
