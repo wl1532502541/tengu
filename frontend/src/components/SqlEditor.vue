@@ -1,7 +1,12 @@
 <template>
     <div class="sql-editor-container" ref="container">
         <div class="tool-bar">
-            <SvgIcon name="run" class="run-icon" size="24px" @click="runSql" />
+            <el-tooltip effect="light" content="save" placement="top" :show-arrow="false">
+                <SvgIcon name="save" class="save-icon" size="24px" @click="saveSql" />
+            </el-tooltip>
+            <el-tooltip effect="light" content="run" placement="top" :show-arrow="false">
+                <SvgIcon name="run" class="run-icon" size="24px" @click="runSql" />
+            </el-tooltip>
         </div>
         <div ref="editor" class="editor"></div>
         <div class="result-container" v-if="result.columns.length">
@@ -16,11 +21,17 @@
 <script setup lang='ts'>
 import * as monaco from 'monaco-editor';
 import { useConnStore } from '../store/conn';
-import { Query } from '../../wailsjs/go/main/App';
+import { useSqlScriptStore } from '../store/sql-script'
+import { Query,SaveFileDialog } from '../../wailsjs/go/main/App';
 import { ElMessage } from 'element-plus';
 import { QueryResult } from '../type/query-result';
+import { GetStorage } from '../../wailsjs/go/main/App';
+import { SaveStorage } from '../../wailsjs/go/main/App';
+import { useWorkTabStore } from '../store/work-tab';
 
 const connStore = useConnStore()
+
+const workTabStore = useWorkTabStore()
 
 const editor = ref();
 
@@ -134,6 +145,32 @@ const runSql = async () => {
     result.data = data
 }
 
+const sqlScriptStore = useSqlScriptStore()
+const saveSql = async () =>{
+    const sqlScriptContent = instance.getValue()
+    try{
+        let saveFileName = workTabStore.currentWorkTab?.name as string
+        //获取最后一个.的位置
+        let index= saveFileName.lastIndexOf(".");
+        if(index===-1){
+            saveFileName = saveFileName + ".sql"
+        }
+        const sqlScriptPath = await SaveFileDialog(saveFileName,"Save sql script",sqlScriptContent)
+        const fileName = sqlScriptPath.split("/").pop()
+        // 把文件名放入storage里 存文件名——地址的映射
+        const storage = await GetStorage('sql-script')
+        if(storage){
+            const sqlScriptList =JSON.parse(storage)
+            sqlScriptList.push({fileName:fileName,filePath:sqlScriptPath})
+            // 存入storage
+            await SaveStorage('sql-script', sqlScriptList)
+            // 存入store
+            sqlScriptStore.add(sqlScriptList)
+        }
+    }catch(e){
+        console.log('save sql error:',e)
+    }
+}
 
 </script>
     
@@ -152,10 +189,15 @@ const runSql = async () => {
         display: flex;
         align-items: center;
         justify-content: end;
+        gap:20px;
 
         .run-icon {
             cursor: pointer;
         }
+        .save-icon{
+            cursor: pointer;
+        }
+        
     }
 
 

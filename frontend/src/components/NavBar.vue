@@ -45,6 +45,7 @@ const handleAddSql = () => {
     icon: sqlScript
   }
   workTabStore.addWorkTab(workTab)
+  workTabStore.setCurrentWorkTab(workTab)
   workTabStore.setCurrentWorkTabId(workTab.id)
 }
 

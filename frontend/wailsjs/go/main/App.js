@@ -10,6 +10,10 @@ export function Query(arg1, arg2, arg3) {
   return window['go']['main']['App']['Query'](arg1, arg2, arg3);
 }
 
+export function SaveFileDialog(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SaveFileDialog'](arg1, arg2, arg3);
+}
+
 export function SaveStorage(arg1, arg2) {
   return window['go']['main']['App']['SaveStorage'](arg1, arg2);
 }
