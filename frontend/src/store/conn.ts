@@ -20,7 +20,7 @@ export const useConnStore = defineStore("conn", {
       this.connList = connList;
     },
     setOpenedConnList(openedConnList: TenguConn[]) {
-        console.log(openedConnList)
+      console.log(openedConnList)
       this.openedConnList = openedConnList;
     },
     setCurrentConn(currentConn: TenguConn) {

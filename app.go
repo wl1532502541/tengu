@@ -4,10 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	_ "github.com/go-sql-driver/mysql"
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // App struct
@@ -136,4 +139,48 @@ func toJSON(v interface{}) string {
 		return ""
 	}
 	return string(b)
+}
+
+func (a *App) SaveFileDialog(fileName, title, sqlContent string) (string, error) {
+	ex, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	exPath := filepath.Dir(ex)
+
+	options := runtime.SaveDialogOptions{
+		DefaultDirectory:           exPath,
+		DefaultFilename:            "script.sql",
+		Title:                      "save",
+		Filters:                    nil,
+		ShowHiddenFiles:            false,
+		CanCreateDirectories:       true,
+		TreatPackagesAsDirectories: true,
+	}
+	if fileName != "" {
+		options.DefaultFilename = fileName
+	}
+	if title != "" {
+		options.Title = title
+	}
+	savePath, err := runtime.SaveFileDialog(a.ctx, options)
+	if err != nil || savePath == "" {
+		return "", err
+	}
+	f, err := os.OpenFile(path.Join(savePath), os.O_CREATE|os.O_WRONLY, 0644)
+	defer func() {
+		if err := f.Close(); err != nil {
+			panic(err) // 或设置到函数返回值中
+		}
+	}()
+	if err != nil {
+		return "", err
+	}
+	_, err = f.Write([]byte(sqlContent))
+	if err != nil {
+		println(err.Error())
+		return "", err
+	}
+
+	return savePath, err
 }

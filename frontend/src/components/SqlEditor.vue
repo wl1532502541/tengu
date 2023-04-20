@@ -1,7 +1,12 @@
 <template>
     <div class="sql-editor-container" ref="container">
         <div class="tool-bar">
-            <SvgIcon name="run" class="run-icon" size="24px" @click="runSql" />
+            <el-tooltip effect="light" content="save" placement="top" :show-arrow="false">
+                <SvgIcon name="save" class="save-icon" size="24px" @click="saveSql" />
+            </el-tooltip>
+            <el-tooltip effect="light" content="run" placement="top" :show-arrow="false">
+                <SvgIcon name="run" class="run-icon" size="24px" @click="runSql" />
+            </el-tooltip>
         </div>
         <div ref="editor" class="editor"></div>
         <div class="result-container" v-if="result.columns.length">
@@ -16,11 +21,20 @@
 <script setup lang='ts'>
 import * as monaco from 'monaco-editor';
 import { useConnStore } from '../store/conn';
-import { Query } from '../../wailsjs/go/main/App';
+import { SqlScript, useSqlScriptStore } from '../store/sql-script'
+import { Query, SaveFileDialog } from '../../wailsjs/go/main/App';
 import { ElMessage } from 'element-plus';
 import { QueryResult } from '../type/query-result';
+import { GetStorage } from '../../wailsjs/go/main/App';
+import { SaveStorage } from '../../wailsjs/go/main/App';
+import { WorkTab, useWorkTabStore } from '../store/work-tab';
+import SqlEditor from './SqlEditor.vue'
+import sqlScriptImg from '../assets/images/sql_script.png'
+
 
 const connStore = useConnStore()
+
+const workTabStore = useWorkTabStore()
 
 const editor = ref();
 
@@ -52,6 +66,7 @@ const tableHeight = ref('10px')
 let instance: monaco.editor.IStandaloneCodeEditor;
 
 onMounted(() => {
+    debugger
     nextTick().then(() => {
         const height = (container.value.clientHeight - 40) / 2
         tableHeight.value = `${height}px`
@@ -94,6 +109,11 @@ onMounted(() => {
             enabled: false // 是否启用预览图
         },
     });
+    const sqlCurrent = sqlScriptStore.current
+    if (sqlCurrent) {
+        instance.setValue(sqlCurrent.sql)
+        debugger
+    }
 
     // document.addEventListener("keydown", (e) => {
     //     console.log(e)
@@ -134,6 +154,54 @@ const runSql = async () => {
     result.data = data
 }
 
+const sqlScriptStore = useSqlScriptStore()
+const saveSql = async () => {
+    const sqlScriptContent = instance.getValue()
+    try {
+        let sqlScriptList: SqlScript[] = [];
+        const storage = await GetStorage('sql-script')
+        if (storage) {
+            sqlScriptList = JSON.parse(storage)
+        }
+
+        const exitSql = sqlScriptStore.findByFilePath(workTabStore.currentWorkTabId)
+        if (exitSql) {
+            exitSql.sql = instance.getValue()
+            await SaveStorage('sql-script', JSON.stringify(sqlScriptStore.sqlSqcriptList))
+            ElMessage.success("save sql script success!")
+            return
+        }
+
+        let saveFileName = workTabStore.currentWorkTab?.name as string
+        //获取最后一个.的位置
+        let index = saveFileName.lastIndexOf(".");
+        if (index === -1) {
+            saveFileName = saveFileName + ".sql"
+        }
+        const sqlScriptPath = await SaveFileDialog(saveFileName, "Save sql script", sqlScriptContent)
+        const fileName = sqlScriptPath.split("\\").pop()
+        if (!fileName) {
+            // 说明取消了保存
+            return
+        }
+
+        const newSqlScript = { fileName: fileName as string, filePath: sqlScriptPath, sql: instance.getValue() }
+        sqlScriptList.push(newSqlScript)
+        sqlScriptStore.setCurrent(newSqlScript)
+        // 存入storage
+        await SaveStorage('sql-script', JSON.stringify(sqlScriptList))
+        // 存入store
+        sqlScriptStore.setList(sqlScriptList)
+
+        // 保存新文件成功后把当前untitled换成返回的名字 todo 这里有点问题
+        const currentWorkTab = workTabStore.currentWorkTab as WorkTab
+        currentWorkTab.name = fileName as string
+        currentWorkTab.id = sqlScriptPath
+        workTabStore.setCurrentWorkTabId(sqlScriptPath)
+    } catch (e) {
+        console.log('save sql error:', e)
+    }
+}
 
 </script>
     
@@ -152,10 +220,16 @@ const runSql = async () => {
         display: flex;
         align-items: center;
         justify-content: end;
+        gap: 20px;
 
         .run-icon {
             cursor: pointer;
         }
+
+        .save-icon {
+            cursor: pointer;
+        }
+
     }
 
 

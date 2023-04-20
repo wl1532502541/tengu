@@ -13,9 +13,10 @@ import sqlScript from '../assets/images/sql_script.png'
 import { WindowIsFullscreen } from '../../wailsjs/runtime/runtime'
 import { useWorkTabStore } from '../store/work-tab';
 import SqlEditor from './SqlEditor.vue'
+import { useSqlScriptStore } from '../store/sql-script';
 
 const workTabStore = useWorkTabStore();
-
+const sqlScriptStore = useSqlScriptStore()
 
 const paddingTop = ref("25px");
 const showAddModal = ref(false)
@@ -45,7 +46,9 @@ const handleAddSql = () => {
     icon: sqlScript
   }
   workTabStore.addWorkTab(workTab)
+  workTabStore.setCurrentWorkTab(workTab)
   workTabStore.setCurrentWorkTabId(workTab.id)
+  sqlScriptStore.setCurrent(null)
 }
 
 </script>

@@ -1,13 +1,13 @@
 <template>
-    <el-tabs type="card" :active-name="workTabStore.currentWorkTabId" @tab-remove="removeTab">
-        <el-tab-pane v-for="item in workTabStore.workTabList" :name="item.id" :closable="item.closeable">
+    <el-tabs type="card" :active-name="workTabStore.currentWorkTabId" @tab-remove="removeTab" @tab-change="changeTab">
+        <el-tab-pane v-for="item in workTabStore.workTabList" :name="item.id" :closable="item.closeable" :key="item.id">
             <template #label>
                 <span class="custom-tabs-label">
                     <img :src="item.icon!" v-if="item.icon">
                     <span>{{ item.name }}</span>
                 </span>
             </template>
-            <component :is="item.component" v-if="item.component" />
+            <component :is="item.component" v-if="item.component" :key="item.id" />
         </el-tab-pane>
 
     </el-tabs>
@@ -23,7 +23,9 @@ const workTabStore = useWorkTabStore();
 const removeTab = (targetId: TabPaneName) => {
     targetId = targetId as string
     let tabWorks = workTabStore.workTabList;
+    const currentId = workTabStore.currentWorkTabId
     if (targetId === workTabStore.currentWorkTabId) {
+        debugger
         tabWorks.forEach((tab, index) => {
             if (tab.id === targetId) {
                 const nextTab = tabWorks[index + 1] || tabWorks[index - 1]
@@ -34,7 +36,14 @@ const removeTab = (targetId: TabPaneName) => {
         })
     }
     tabWorks = tabWorks.filter((tab) => tab.id !== targetId)
+    workTabStore.setCurrentWorkTabId(currentId)
     workTabStore.setWorkTabList(tabWorks)
+    debugger
+}
+
+const changeTab = (targetId: TabPaneName) => {
+    workTabStore.setCurrentWorkTabId(targetId as string)
+    debugger
 }
 
 </script>

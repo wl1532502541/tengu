@@ -29,7 +29,7 @@
         display: flex;
 
         .file-container {
-          margin-top: 10px;
+            margin-top: 10px;
         }
 
         .main-view-container {

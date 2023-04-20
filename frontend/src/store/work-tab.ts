@@ -43,5 +43,15 @@ export const useWorkTabStore = defineStore("work-tab", {
     setCurrentWorkTabId(currentWorkTabId: string) {
       this.currentWorkTabId = currentWorkTabId;
     },
+    findAndSetById(id: string) {
+      const tab = this.workTabList.find((tab) => tab.id === id)
+      if (tab) {
+        this.setCurrentWorkTab(tab)
+        this.setCurrentWorkTabId(tab.id)
+        return true
+      } else {
+        return false
+      }
+    }
   },
 });

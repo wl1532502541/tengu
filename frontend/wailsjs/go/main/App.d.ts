@@ -5,6 +5,8 @@ export function GetStorage(arg1:string):Promise<string>;
 
 export function Query(arg1:string,arg2:string,arg3:string):Promise<string>;
 
+export function SaveFileDialog(arg1:string,arg2:string,arg3:string):Promise<string>;
+
 export function SaveStorage(arg1:string,arg2:string):Promise<boolean>;
 
 export function TestConnect(arg1:string,arg2:string):Promise<string>;
