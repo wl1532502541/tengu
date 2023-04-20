@@ -12,7 +12,6 @@
         <div class="result-container" v-if="result.columns.length">
             <el-table class="result-table" border table-layout="auto" :data="result.data" :height="tableHeight">
                 <el-table-column v-for="item in result.columns" :prop="item" :label="item" :key="item" min-width="200px" />
-
             </el-table>
         </div>
     </div>
@@ -28,8 +27,6 @@ import { QueryResult } from '../type/query-result';
 import { GetStorage } from '../../wailsjs/go/main/App';
 import { SaveStorage } from '../../wailsjs/go/main/App';
 import { WorkTab, useWorkTabStore } from '../store/work-tab';
-import SqlEditor from './SqlEditor.vue'
-import sqlScriptImg from '../assets/images/sql_script.png'
 
 
 const connStore = useConnStore()
@@ -86,14 +83,7 @@ onMounted(() => {
         inherit: true,
         rules: [{ token: '', background: '#f6f8fa' }],
         colors: {
-            // 相关颜色属性配置
-            // 'editor.foreground': '#000000',
             'editor.background': '#f6f8fa',     //背景色
-            // 'editorCursor.foreground': '#8B0000',
-            // 'editor.lineHighlightBackground': '#0000FF20',
-            // 'editorLineNumber.foreground': '#008800',
-            // 'editor.selectionBackground': '#88000030',
-            // 'editor.inactiveSelectionBackground': '#88000015'
         }
     });
 
@@ -236,8 +226,6 @@ const saveSql = async () => {
     .editor {
         width: 100%;
         flex: 1;
-        // border-bottom-left-radius: 10px;
-        // border-bottom-right-radius: 10px;
     }
 
     .result-container {
@@ -246,9 +234,4 @@ const saveSql = async () => {
         .result-table {}
     }
 }
-
-// .el-table .cell {
-//     white-space: nowrap;
-//     display: inline-block;
-// }
 </style>
