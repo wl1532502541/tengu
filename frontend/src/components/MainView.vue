@@ -23,7 +23,7 @@ const workTabStore = useWorkTabStore();
 const removeTab = (targetId: TabPaneName) => {
     targetId = targetId as string
     let tabWorks = workTabStore.workTabList;
-    const currentId = workTabStore.currentWorkTabId
+    // const currentId = workTabStore.currentWorkTabId
     if (targetId === workTabStore.currentWorkTabId) {
         debugger
         tabWorks.forEach((tab, index) => {
@@ -36,7 +36,7 @@ const removeTab = (targetId: TabPaneName) => {
         })
     }
     tabWorks = tabWorks.filter((tab) => tab.id !== targetId)
-    workTabStore.setCurrentWorkTabId(currentId)
+    // workTabStore.setCurrentWorkTabId(currentId)
     workTabStore.setWorkTabList(tabWorks)
     debugger
 }

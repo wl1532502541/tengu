@@ -184,3 +184,7 @@ func (a *App) SaveFileDialog(fileName, title, sqlContent string) (string, error)
 
 	return savePath, err
 }
+
+func (a *App) GetFileNameByFilePath(filePath string) string{
+	return filepath.Base(filePath)
+}

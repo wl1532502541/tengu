@@ -21,7 +21,7 @@
 import * as monaco from 'monaco-editor';
 import { useConnStore } from '../store/conn';
 import { SqlScript, useSqlScriptStore } from '../store/sql-script'
-import { Query, SaveFileDialog } from '../../wailsjs/go/main/App';
+import { Query, SaveFileDialog,GetFileNameByFilePath } from '../../wailsjs/go/main/App';
 import { ElMessage } from 'element-plus';
 import { QueryResult } from '../type/query-result';
 import { GetStorage } from '../../wailsjs/go/main/App';
@@ -169,7 +169,7 @@ const saveSql = async () => {
             saveFileName = saveFileName + ".sql"
         }
         const sqlScriptPath = await SaveFileDialog(saveFileName, "Save sql script", sqlScriptContent)
-        const fileName = sqlScriptPath.split("\\").pop()
+        const fileName = await GetFileNameByFilePath(sqlScriptPath)
         if (!fileName) {
             // 说明取消了保存
             return
@@ -190,6 +190,7 @@ const saveSql = async () => {
         workTabStore.setCurrentWorkTabId(sqlScriptPath)
     } catch (e) {
         console.log('save sql error:', e)
+        ElMessage.error("save sql error:" + e)
     }
 }
 
